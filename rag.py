@@ -23,7 +23,11 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def get_vector_db():
-    return faiss.read_index("information.index")
+    try:
+        return faiss.read_index("information.index")
+    except Exception as e:
+        st.error(f"Failed to load vector database: {e}")
+        return None
 
 
 
