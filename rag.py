@@ -1,3 +1,8 @@
+import os
+os.environ["USE_TF"] = "0"   # Disable TensorFlow imports
+os.environ["USE_TORCH"] = "1"  # Force PyTorch
+
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.llms import Ollama 
@@ -5,7 +10,6 @@ from sentence_transformers import SentenceTransformer
 import faiss 
 from main import process_image, predict_disease
 import streamlit as st
-import os
 import json
 from dotenv import load_dotenv
 

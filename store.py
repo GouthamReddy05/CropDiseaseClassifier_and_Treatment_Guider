@@ -1,6 +1,10 @@
+import os
+os.environ["USE_TF"] = "0"   # Disable TensorFlow imports
+os.environ["USE_TORCH"] = "1"  # Force PyTorch
+
+
 from sentence_transformers import SentenceTransformer
 import json
-import os
 import faiss
 import numpy as np
 from tqdm import tqdm
