@@ -55,7 +55,7 @@ def predict_disease(image_path):
     img = process_image(image_path)
     pred = model.predict(img)
     predicted_index = np.argmax(pred, axis=1)
-    return f"Disease : {class_labels[int(predicted_index)]}"
+    return f"{class_labels[int(predicted_index)]}"
 
 # print(predict_disease("sample.JPG"))
 

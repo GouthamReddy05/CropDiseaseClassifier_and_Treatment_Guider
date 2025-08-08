@@ -49,6 +49,12 @@ def search_faiss(answer_query):
 
 
 
+def create_ollama_llm():
+    return Ollama(
+        base_url="http://localhost:11434",  # Default Ollama URL
+        model="llama3",  # Use the model you pulled
+    )
+
 # print(run_rag_pipeline("Potato___Late_blight"))
 
 def run_rag_pipeline(answer_query):
@@ -68,7 +74,7 @@ def run_rag_pipeline(answer_query):
     Answer in a clear and detailed manner without referring to any links.
     """)
 
-    llm = Ollama(model="llama3")  
+    llm = create_ollama_llm()
 
     chain = prompt | llm | StrOutputParser()
 
