@@ -5,7 +5,7 @@ from langchain.memory import ConversationBufferMemory
 from rag import run_rag_pipeline
 import numpy as np
 from PIL import Image
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 import main
 import os
 from dotenv import load_dotenv

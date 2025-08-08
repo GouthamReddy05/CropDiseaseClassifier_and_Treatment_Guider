@@ -5,7 +5,7 @@ import faiss
 import numpy as np
 from tqdm import tqdm 
 from PIL import Image
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 import warnings
 
 warnings.filterwarnings("ignore")
