@@ -10,13 +10,12 @@ import json
 from dotenv import load_dotenv
 
 
-load_dotenv()
+# load_dotenv()
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
-# os.environ["LANGCHAIN_TRACING_V2"]="true"
-# os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
+
 
 
 def get_vector_db():

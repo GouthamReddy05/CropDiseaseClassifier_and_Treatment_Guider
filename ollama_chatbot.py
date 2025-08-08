@@ -7,10 +7,13 @@ import numpy as np
 from PIL import Image
 from tensorflow.keras.models import load_model
 import main
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-os.environ["LANGCHAIN_TRACING_V2"]="true"
-os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
+# os.environ["LANGCHAIN_TRACING_V2"]="true"
+# os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
 
 st.set_page_config(page_title="Ollama Chatbot", page_icon="🤖")
 
