@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChatGPT Clone</title>
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --card: #ffffff;
+      --text: #111;
+      --accent: #10a37f;
+      --user-bg: rgba(16, 163, 127, 0.12);
+      --bot-bg: #ffffff;
+      --scrollbar: rgba(0,0,0,0.3);
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #1a2437;
+      --text: #e6eef8;
+      --accent: #34d399;
+      --user-bg: rgba(16, 163, 127, 0.25);
+      --bot-bg: #1a2437;
+      --scrollbar: rgba(255,255,255,0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .app {
+      width: 720px;
+      max-width: 96vw;
+      height: 80vh;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 6px 30px rgba(2, 6, 23, 0.15);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-color: var(--scrollbar) transparent;
+      padding-right: 4px;
+    }
+
+    .msg {
+      max-width: 78%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: var(--user-bg);
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: var(--bot-bg);
+    }
+
+    textarea {
+      flex: 1;
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: transparent;
+      color: var(--text);
+      resize: none;
+      transition: color 0.3s ease, background 0.3s ease;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: 0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      filter: brightness(0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h3>ChatGPT Clone</h3>
+      <button id="themeBtn">Dark</button>
+    </div>
+    <div class="messages" id="messages">
+      <div class="msg bot">Hello! This is a ChatGPT clone UI. Press Enter to send. Toggle theme on the top-right.</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <textarea id="input" placeholder="Type here..." rows="1"></textarea>
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Theme toggle for entire page
+    themeBtn.onclick = () => {
+      const isLight = root.getAttribute('data-theme') === 'light';
+      root.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      themeBtn.textContent = isLight ? 'Light' : 'Dark';
+    };
+
+    function typeMessage(text, element) {
+      let i = 0;
+      const interval = setInterval(() => {
+        element.textContent += text.charAt(i);
+        i++;
+        if (i >= text.length) clearInterval(interval);
+      }, 30);
+    }
+
+    function addMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.className = 'msg ' + sender;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+
+      if (sender === 'bot') {
+        typeMessage(text, msg);
+      } else {
+        msg.textContent = text;
+      }
+    }
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+
+      // Fetch from Flask backend
+      fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      })
+      .then(res => res.json())
+      .then(data => {
+        addMessage(data.reply || 'No response from server.', 'bot');
+      })
+      .catch(() => {
+        addMessage('Error: Unable to connect to server.', 'bot');
+      });
+    }
+
+    sendBtn.onclick = sendMessage;
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>

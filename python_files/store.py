@@ -1,13 +1,15 @@
-import os
-os.environ["USE_TF"] = "0"   # Disable TensorFlow imports
-os.environ["USE_TORCH"] = "1"  # Force PyTorch
+# os.environ["USE_TF"] = "0"   # Disable TensorFlow imports
+# os.environ["USE_TORCH"] = "1"  # Force PyTorch
 
 
 from sentence_transformers import SentenceTransformer
 import json
+import os
 import faiss
 import numpy as np
 from tqdm import tqdm
+
+# source myenv/bin/activate
 
 
 with open("data.json", "r") as f:
@@ -64,5 +66,5 @@ print(f"✅ Indexed {len(metadata)} texts.")
 
 faiss.write_index(index, "information.index")
 
-with open("metadata.json", "w", encoding='utf-8') as f:
+with open("structured_data.json", "w", encoding='utf-8') as f:
         json.dump(metadata, f, indent=2)

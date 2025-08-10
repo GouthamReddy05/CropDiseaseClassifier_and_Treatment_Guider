@@ -65,6 +65,3 @@ emb_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def encode_output(text):
     return emb_model.encode(text, convert_to_tensor=True, show_progress_bar=False)
-
-
-

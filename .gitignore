@@ -1,0 +1,9 @@
+echo "myenv/
+__pycache__/
+*.keras
+*.h5
+*.log
+*.pyc
+*.pyo
+.DS_Store
+.env" > .gitignore

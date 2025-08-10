@@ -8,4 +8,8 @@ python-dotenv
 numpy
 tqdm
 tensorflow
+tf-keras
 Pillow
+flask
+requests
+langchain-google-genai
