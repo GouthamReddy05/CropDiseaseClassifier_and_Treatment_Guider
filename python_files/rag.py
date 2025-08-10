@@ -49,34 +49,34 @@ def get_vector_db():
 # print(model.invoke("Hello, are you working?"))
 
 
-# def search_faiss(answer_query):
-#     vector_db = get_vector_db()
-#     emb = embedding_model.encode(answer_query)
-#     emb = emb.reshape(1, -1).astype("float32")
+def search_faiss(answer_query):
+    vector_db = get_vector_db()
+    emb = embedding_model.encode(answer_query)
+    emb = emb.reshape(1, -1).astype("float32")
 
-#     ## search in vector database
+    ## search in vector database
 
-#     answer = None
+    answer = None
 
-#     _, indices = vector_db.search(emb, k=1)
-#     index = indices[0][0]
+    _, indices = vector_db.search(emb, k=1)
+    index = indices[0][0]
 
-#     with open("structured_data.json", "r") as f:
-#         metadata = json.load(f)
+    with open("structured_data.json", "r") as f:
+        metadata = json.load(f)
 
-#     if index != -1 and index < len(metadata):
-#         return metadata[index]
+    if index != -1 and index < len(metadata):
+        return metadata[index]
     
-#     return "Sorry, no relevant information found."
+    return "Sorry, no relevant information found."
 
 
 
 
-# def run_rag_pipeline(answer_query):
+def run_rag_pipeline(answer_query):
 
-#     context = search_faiss(answer_query)
+    context = search_faiss(answer_query)
 
-#     return context
+    return context
 
     
 
