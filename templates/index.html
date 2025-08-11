@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ChatGPT Clone</title>
+  <title>AI Chat with Disease Detection</title>
   <style>
     :root {
       --bg: #f7f7f8;
@@ -13,6 +13,7 @@
       --user-bg: rgba(16, 163, 127, 0.12);
       --bot-bg: #ffffff;
       --scrollbar: rgba(0,0,0,0.3);
+      --border: rgba(0,0,0,0.1);
     }
 
     :root[data-theme="dark"] {
@@ -23,6 +24,7 @@
       --user-bg: rgba(16, 163, 127, 0.25);
       --bot-bg: #1a2437;
       --scrollbar: rgba(255,255,255,0.4);
+      --border: rgba(255,255,255,0.1);
     }
 
     * {
@@ -37,14 +39,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       transition: background 0.3s ease, color 0.3s ease;
+      padding: 10px;
     }
 
     .app {
-      width: 720px;
+      width: 800px;
       max-width: 96vw;
-      height: 80vh;
+      height: 85vh;
       background: var(--card);
       border-radius: 12px;
       padding: 14px;
@@ -59,6 +62,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
     }
 
     .messages {
@@ -71,63 +76,261 @@
       padding-right: 4px;
     }
 
+    .messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+      background: var(--scrollbar);
+      border-radius: 3px;
+    }
+
     .msg {
       max-width: 78%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      line-height: 1.4;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.5;
       word-wrap: break-word;
       white-space: pre-wrap;
+      position: relative;
     }
 
     .user {
       align-self: flex-end;
       background: var(--user-bg);
+      border: 1px solid rgba(16, 163, 127, 0.2);
     }
 
     .bot {
       align-self: flex-start;
       background: var(--bot-bg);
+      border: 1px solid var(--border);
+    }
+
+    .image-msg {
+      max-width: 85%;
+    }
+
+    .image-preview {
+      max-width: 300px;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 2px solid var(--border);
+    }
+
+    .input-container {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .text-input-group {
+      flex: 1;
+      position: relative;
     }
 
     textarea {
-      flex: 1;
+      width: 100%;
       border-radius: 8px;
-      padding: 10px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 12px;
+      border: 1px solid var(--border);
       background: transparent;
       color: var(--text);
       resize: none;
-      transition: color 0.3s ease, background 0.3s ease;
+      transition: all 0.3s ease;
+      min-height: 44px;
+      max-height: 120px;
     }
 
-    button {
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .upload-btn, .send-btn, .theme-btn {
       background: var(--accent);
       color: white;
       border: 0;
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 44px;
+      justify-content: center;
     }
 
-    button:hover {
+    .upload-btn:hover, .send-btn:hover, .theme-btn:hover {
       filter: brightness(0.9);
+      transform: translateY(-1px);
+    }
+
+    .upload-btn {
+      background: #6366f1;
+    }
+
+    .theme-btn {
+      background: #374151;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .typing-indicator {
+      display: inline-block;
+    }
+
+    .typing-indicator::after {
+      content: '●●●';
+      animation: typing 1.4s infinite;
+      color: var(--accent);
+    }
+
+    @keyframes typing {
+      0%, 60% { opacity: 0; }
+      30% { opacity: 1; }
+    }
+
+    .file-preview {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      padding: 8px;
+      display: none;
+    }
+
+    .file-preview.show {
+      display: block;
+    }
+
+    .file-preview img {
+      max-width: 100px;
+      max-height: 60px;
+      border-radius: 4px;
+    }
+
+    .file-preview-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .remove-file {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: auto;
+    }
+
+    .status-info {
+      background: rgba(16, 163, 127, 0.1);
+      border: 1px solid rgba(16, 163, 127, 0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .app {
+        height: 95vh;
+        padding: 10px;
+      }
+      
+      .msg {
+        max-width: 90%;
+        padding: 10px 12px;
+      }
+      
+      .input-container {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      
+      .upload-btn, .send-btn {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <div class="header">
-      <h3>ChatGPT Clone</h3>
-      <button id="themeBtn">Dark</button>
+      <div>
+        <h3 style="margin: 0; color: var(--accent);">🏥 AI Medical Assistant</h3>
+        <small style="color: var(--text); opacity: 0.7;">Chat & Disease Detection</small>
+      </div>
+      <button id="themeBtn" class="theme-btn">🌙 Dark</button>
     </div>
+    
     <div class="messages" id="messages">
-      <div class="msg bot">Hello! This is a ChatGPT clone UI. Press Enter to send. Toggle theme on the top-right.</div>
+      <div class="msg bot">
+        👋 Hello! I'm your AI medical assistant. You can:
+        <br>• Ask me medical questions
+        <br>• Upload images for disease detection
+        <br>• Get treatment recommendations
+        
+        <div class="status-info">
+          📤 Use the upload button to analyze medical images
+          <br>⌨️ Type your questions and press Enter to send
+        </div>
+      </div>
     </div>
-    <div style="display:flex; gap:8px;">
-      <textarea id="input" placeholder="Type here..." rows="1"></textarea>
-      <button id="sendBtn">Send</button>
+    
+    <div class="input-container">
+      <div class="text-input-group">
+        <div class="file-preview" id="filePreview">
+          <div class="file-preview-content" id="filePreviewContent"></div>
+        </div>
+        <textarea id="input" placeholder="Ask me anything about health or medicine..." rows="1"></textarea>
+      </div>
+      
+      <div class="file-input-wrapper">
+        <input type="file" id="fileInput" class="file-input" accept="image/*">
+        <button id="uploadBtn" class="upload-btn" title="Upload Image">
+          📷
+        </button>
+      </div>
+      
+      <button id="sendBtn" class="send-btn" title="Send Message">
+        ➤
+      </button>
     </div>
   </div>
 
@@ -137,57 +340,220 @@
     const messages = document.getElementById('messages');
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('sendBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const filePreviewContent = document.getElementById('filePreviewContent');
 
-    // Theme toggle for entire page
+    let selectedFile = null;
+
+    // Theme toggle
     themeBtn.onclick = () => {
       const isLight = root.getAttribute('data-theme') === 'light';
       root.setAttribute('data-theme', isLight ? 'dark' : 'light');
-      themeBtn.textContent = isLight ? 'Light' : 'Dark';
+      themeBtn.innerHTML = isLight ? '☀️ Light' : '🌙 Dark';
     };
+
+    // Auto-resize textarea
+    input.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // File upload handling
+    uploadBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        selectedFile = file;
+        showFilePreview(file);
+      } else {
+        alert('Please select a valid image file.');
+      }
+    };
+
+    function showFilePreview(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        filePreviewContent.innerHTML = `
+          <img src="${e.target.result}" alt="Preview">
+          <div>
+            <strong>${file.name}</strong>
+            <br><small>${(file.size / 1024).toFixed(1)} KB</small>
+          </div>
+          <button class="remove-file" onclick="removeFile()">✕</button>
+        `;
+        filePreview.classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      filePreview.classList.remove('show');
+      filePreviewContent.innerHTML = '';
+    }
 
     function typeMessage(text, element) {
       let i = 0;
+      element.innerHTML = '';
       const interval = setInterval(() => {
-        element.textContent += text.charAt(i);
+        element.innerHTML += text.charAt(i);
         i++;
         if (i >= text.length) clearInterval(interval);
-      }, 30);
+      }, 20);
     }
 
-    function addMessage(text, sender) {
+    function addMessage(content, sender, isImage = false) {
       const msg = document.createElement('div');
-      msg.className = 'msg ' + sender;
+      msg.className = `msg ${sender}${isImage ? ' image-msg' : ''}`;
       messages.appendChild(msg);
-      messages.scrollTop = messages.scrollHeight;
-
+      
       if (sender === 'bot') {
-        typeMessage(text, msg);
+        msg.innerHTML = '<span class="typing-indicator"></span>';
+        setTimeout(() => {
+          if (typeof content === 'string') {
+            typeMessage(content, msg);
+          } else {
+            msg.innerHTML = content;
+          }
+        }, 500);
       } else {
-        msg.textContent = text;
+        if (typeof content === 'string') {
+          msg.textContent = content;
+        } else {
+          msg.innerHTML = content;
+        }
+      }
+      
+      messages.scrollTop = messages.scrollHeight;
+      return msg;
+    }
+
+    function setLoading(isLoading) {
+      sendBtn.disabled = isLoading;
+      uploadBtn.disabled = isLoading;
+      input.disabled = isLoading;
+      
+      if (isLoading) {
+        sendBtn.innerHTML = '⏳';
+        document.querySelector('.app').classList.add('loading');
+      } else {
+        sendBtn.innerHTML = '➤';
+        document.querySelector('.app').classList.remove('loading');
       }
     }
 
-    function sendMessage() {
+    async function sendMessage() {
       const text = input.value.trim();
-      if (!text) return;
-      addMessage(text, 'user');
+      
+      // Check if we have text or image
+      if (!text && !selectedFile) return;
+      
+      // Display user message
+      if (selectedFile && text) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = `
+            <img src="${e.target.result}" alt="Uploaded image" class="image-preview">
+            <div>${text}</div>
+          `;
+          addMessage(content, 'user', true);
+        };
+        reader.readAsDataURL(selectedFile);
+      } else if (selectedFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = `<img src="${e.target.result}" alt="Uploaded image" class="image-preview">`;
+          addMessage(content, 'user', true);
+        };
+        reader.readAsDataURL(selectedFile);
+      } else {
+        addMessage(text, 'user');
+      }
+      
+      // Clear inputs
       input.value = '';
+      input.style.height = 'auto';
+      
+      setLoading(true);
+      
+      try {
+        if (selectedFile) {
+          // Process image
+          await processImage(selectedFile, text);
+        } else {
+          // Process text only
+          await processText(text);
+        }
+      } catch (error) {
+        addMessage('❌ Sorry, there was an error processing your request. Please try again.', 'bot');
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+        removeFile();
+      }
+    }
 
-      // Fetch from Flask backend
-      fetch('/chat', {
+    async function processImage(file, text) {
+      const formData = new FormData();
+      formData.append('image', file);
+      if (text) {
+        formData.append('message', text);
+      }
+
+      const response = await fetch('/process-image', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.error) {
+        addMessage(`❌ Error: ${data.error}`, 'bot');
+        return;
+      }
+
+      // Display results
+      let responseContent = '';
+      
+      if (data.prediction) {
+        responseContent += `🔬 <strong>Disease Detection Result:</strong>\n${data.prediction}\n\n`;
+      }
+      
+      if (data.knowledge) {
+        responseContent += `📚 <strong>Medical Knowledge:</strong>\n${data.knowledge}\n\n`;
+      }
+      
+      if (data.reply) {
+        responseContent += `🌳 AI Analysis & Recommendations:\n${data.reply}`;
+      }
+
+      addMessage(responseContent || '✅ Image processed successfully!', 'bot');
+    }
+
+    async function processText(text) {
+      const response = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text })
-      })
-      .then(res => res.json())
-      .then(data => {
-        addMessage(data.reply || 'No response from server.', 'bot');
-      })
-      .catch(() => {
-        addMessage('Error: Unable to connect to server.', 'bot');
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      addMessage(data.reply || 'No response from server.', 'bot');
     }
 
+    // Event listeners
     sendBtn.onclick = sendMessage;
 
     input.addEventListener('keydown', e => {
@@ -196,6 +562,47 @@
         sendMessage();
       }
     });
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      document.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+      document.querySelector('.app').style.background = 'rgba(16, 163, 127, 0.05)';
+    }
+
+    function unhighlight(e) {
+      document.querySelector('.app').style.background = 'var(--card)';
+    }
+
+    document.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+          selectedFile = file;
+          showFilePreview(file);
+        }
+      }
+    }
   </script>
 </body>
 </html>
