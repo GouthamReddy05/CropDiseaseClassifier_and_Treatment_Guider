@@ -22,12 +22,6 @@ load_dotenv()
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# GROQ_API_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
-# GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-
-gemini_api_key = os.getenv('GEMINI_API_KEY')
-mistrial_api_key = os.getenv('mistrial_api_key')
-
 
 def get_vector_db():
     try:
@@ -75,6 +69,7 @@ def search_faiss(answer_query):
 def run_rag_pipeline(answer_query):
 
     context = search_faiss(answer_query)
+    
 
     return context
 
